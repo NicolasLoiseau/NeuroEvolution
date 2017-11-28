@@ -1,4 +1,5 @@
 import copy
+import json
 
 import numpy as np
 
@@ -9,9 +10,9 @@ direction_mapper = {3: (1, 0), 2: (0, 1), 0: (-1, 0), 1: (0, -1)}
 
 
 class Individual(Kernel):
-    def __init__(self, row_nb, column_nb, cap, a=0):
-        super().__init__(row_nb=row_nb, column_nb=column_nb, cap=cap, a=a)
-        self.intelligence = NeuralNetwork(row_nb, column_nb)
+    def __init__(self, row_nb, column_nb, cap, intelligence=None):
+        super().__init__(row_nb=row_nb, column_nb=column_nb, cap=cap, a=0)
+        self.intelligence = intelligence or NeuralNetwork(row_nb, column_nb)
 
     @property
     def input(self):
@@ -76,3 +77,15 @@ class Individual(Kernel):
         self.skeleton = np.zeros((self.row_nb, self.column_nb)).astype(int)
         self.cap = self.cap0
         self.score = 0
+
+    def export(self):
+        return {
+            'column_nb': self.column_nb,
+            'row_nb': self.row_nb,
+            'cap': self.cap,
+            'intelligence': self.intelligence.export()
+        }
+
+    def save(self, pathfile):
+        with open(pathfile, 'w') as outfile:
+            json.dump(self.export(), outfile)
