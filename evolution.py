@@ -1,5 +1,5 @@
 import numpy as np
-from individual import Indivudual
+from individual import Individual
 
 class Evolution:
 
@@ -10,7 +10,7 @@ class Evolution:
         self.row_nb = row_nb
         self.column_nb = column_nb
         self.cap = cap
-        self.generation = [Indivudual(row_nb, column_nb, cap) for _ in range(0,generation_size)]
+        self.generation = [Individual(row_nb, column_nb, cap) for _ in range(0,generation_size)]
 
     def nextgen(self):
         scores = []
@@ -27,7 +27,8 @@ class Evolution:
             if sg[0]>median:
                 newgen.append(sg[1])
         survivors_nb = len(newgen)
-        #for k in range(self.generation_size-survivors_nb):
-            #newgen.append(newgen[k].mutate)
+        for k in range(self.generation_size-survivors_nb):
+            newgen.append(newgen[k].mutate)
         return(newgen)
 
+evolution=Evolution(1,100,10,6,3,7)
