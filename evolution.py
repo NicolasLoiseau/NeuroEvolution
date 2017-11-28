@@ -1,34 +1,38 @@
 import numpy as np
+
 from individual import Individual
+import matplotlib.pyplot as plt
 
 class Evolution:
-
-    def __init__(self,generation_nb,generation_size, game_per_generation, row_nb, column_nb, cap):
+    def __init__(self, generation_nb, generation_size, game_per_generation, row_nb, column_nb, cap):
         self.generation_nb = generation_nb
         self.generation_size = generation_size
         self.game_per_generation = game_per_generation
         self.row_nb = row_nb
         self.column_nb = column_nb
         self.cap = cap
-        self.generation = [Individual(row_nb, column_nb, cap) for _ in range(0,generation_size)]
+        self.generation = [Individual(row_nb, column_nb, cap) for _ in range(0, generation_size)]
+        self.score_mean = list()
+        self.score_max = list()
 
     def nextgen(self):
-        scores = []
-        newgen = []
+        scores = np.zeros(self.generation_size)
         for i in range(self.game_per_generation):
-            for j in range(len(self.generation)):
-                if i == 0:
-                    scores.append(self.generation[j].play())
-                else:
-                    scores[j] += self.generation[j].play()
-        scores = [s / self.game_per_generation for s in scores]
+            scores += np.array(list(map(lambda ind: ind.play(), self.generation)))
+        scores /= self.game_per_generation
+        self.score_mean.append(np.mean(scores))
+        self.score_max.append(np.max(scores))
         median = np.median(scores)
-        for sg in zip(scores,self.generation):
-            if sg[0]>median:
-                newgen.append(sg[1])
-        survivors_nb = len(newgen)
-        for k in range(self.generation_size-survivors_nb):
-            newgen.append(newgen[k].mutate)
-        return(newgen)
+        newgen = [gen for score, gen in zip(scores, self.generation) if score >= median]
+        for k in range(self.generation_size - len(newgen)):
+            newgen.append(newgen[k].mutate())
+        self.generation = newgen
 
-evolution=Evolution(1,100,10,6,3,7)
+if __name__ == '__main__':
+
+    evolution = Evolution(1, 100, 10, 6, 3, 7)
+    for i in range(1000):
+        print(i)
+        evolution.nextgen()
+    plt.plot(evolution.score_max)
+    plt.show()
