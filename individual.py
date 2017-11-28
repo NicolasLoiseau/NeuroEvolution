@@ -19,6 +19,7 @@ class Individual(Kernel):
         return normalized.reshape((self.column_nb * self.row_nb,))
 
     def play(self):
+        self.reset()
         self.fill()
         while not self.game_over:
             self.one_play()
@@ -70,3 +71,8 @@ class Individual(Kernel):
         child = copy.deepcopy(self)
         child.intelligence.mutate()
         return child
+
+    def reset(self):
+        self.skeleton = np.zeros((self.row_nb, self.column_nb)).astype(int)
+        self.cap = self.cap0
+        self.score = 0
