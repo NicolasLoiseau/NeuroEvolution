@@ -1,7 +1,4 @@
 import numpy as np
-import random
-
-np.random.seed(1)
 
 
 class NeuralNetwork(object):
@@ -22,7 +19,5 @@ class NeuralNetwork(object):
         return self.sigmoid(np.dot(l1, self.syn1))
 
     def mutate(self):
-        if random.randint(0, 1):
-            self.syn0 += (2 * np.random.random((self.input_nb, self.output_nb)) - 1) / 10
-        else:
-            self.syn1 += (2 * np.random.random((self.output_nb, self.output_nb)) - 1) / 10
+        self.syn0 += (2 * np.random.random((self.input_nb, self.output_nb)) - 1) / 10
+        self.syn1 += (2 * np.random.random((self.output_nb, self.output_nb)) - 1) / 10

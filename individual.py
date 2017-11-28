@@ -1,14 +1,14 @@
+import copy
+
 import numpy as np
 
 from UnderTheLine.kernel import Kernel
 from neuralNetwork import NeuralNetwork
 
-
 direction_mapper = {3: (1, 0), 2: (0, 1), 0: (-1, 0), 1: (0, -1)}
 
 
-class Indivudual(Kernel):
-
+class Individual(Kernel):
     def __init__(self, row_nb, column_nb, cap, a=0):
         super().__init__(row_nb=row_nb, column_nb=column_nb, cap=cap, a=a)
         self.intelligence = NeuralNetwork(row_nb, column_nb)
@@ -19,6 +19,7 @@ class Indivudual(Kernel):
         return normalized.reshape((self.column_nb * self.row_nb,))
 
     def play(self):
+        self.reset()
         self.fill()
         while not self.game_over:
             self.one_play()
@@ -65,3 +66,13 @@ class Indivudual(Kernel):
 
     def neural(self):
         return self.intelligence(self.input)
+
+    def mutate(self):
+        child = copy.deepcopy(self)
+        child.intelligence.mutate()
+        return child
+
+    def reset(self):
+        self.skeleton = np.zeros((self.row_nb, self.column_nb)).astype(int)
+        self.cap = self.cap0
+        self.score = 0
