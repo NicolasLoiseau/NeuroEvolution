@@ -1,5 +1,6 @@
 import copy
 import json
+
 import numpy as np
 
 from UnderTheLine.kernel import Kernel
