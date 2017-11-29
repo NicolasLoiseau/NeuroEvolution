@@ -3,6 +3,7 @@ import numpy as np
 from individual import Individual
 import matplotlib.pyplot as plt
 
+
 class Evolution:
     def __init__(self, generation_nb, generation_size, game_per_generation, row_nb, column_nb, cap):
         self.generation_nb = generation_nb
@@ -14,6 +15,7 @@ class Evolution:
         self.generation = [Individual(row_nb, column_nb, cap) for _ in range(0, generation_size)]
         self.score_mean = list()
         self.score_max = list()
+        self.score_min = list()
 
     def nextgen(self):
         scores = np.zeros(self.generation_size)
@@ -22,17 +24,35 @@ class Evolution:
         scores /= self.game_per_generation
         self.score_mean.append(np.mean(scores))
         self.score_max.append(np.max(scores))
+        self.score_min.append(np.min(scores))
         median = np.median(scores)
         newgen = [gen for score, gen in zip(scores, self.generation) if score >= median]
         for k in range(self.generation_size - len(newgen)):
             newgen.append(newgen[k].mutate())
         self.generation = newgen
 
+    def train(self):
+        for i in range(self.generation_nb):
+            self.nextgen()
+            print(int(100 * i / N), '%')
+            print('max: ', int(evolution.score_max[-1]))
+        self.plot()
+
+    def plot(self):
+        x = list(range(self.generation_nb))
+        plt.plot(x, self.score_max, x, self.score_mean, x, self.score_min)
+        plt.show()
+
+
 if __name__ == '__main__':
 
-    evolution = Evolution(1, 100, 10, 6, 3, 7)
-    for i in range(1000):
-        print(i)
-        evolution.nextgen()
-    plt.plot(evolution.score_max)
-    plt.show()
+    evolution = Evolution(
+        generation_nb=200,
+        generation_size=50,
+        game_per_generation=10,
+        row_nb=6,
+        column_nb=3,
+        cap=7
+    )
+    evolution.train()
+
