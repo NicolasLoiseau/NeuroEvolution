@@ -28,8 +28,9 @@ class Individual(Kernel):
 
     def one_play(self):
         start_pt, end_pt = self.get_move()
+        not_equal = self.skeleton[start_pt] != self.skeleton[end_pt]
         self.remodeling(start_pt, end_pt)
-        if self.skeleton[start_pt] != self.skeleton[end_pt]:
+        if not_equal:
             self.refill()
         self.gravity()
 
