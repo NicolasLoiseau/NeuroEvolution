@@ -1,7 +1,10 @@
+import json
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 from individual import Individual
-import matplotlib.pyplot as plt
+from neuralNetwork import NeuralNetwork
 
 
 class Evolution:
@@ -34,7 +37,7 @@ class Evolution:
     def train(self):
         for i in range(self.generation_nb):
             self.nextgen()
-            print(int(100 * i / N), '%')
+            print(int(100 * i / self.generation_nb), '%')
             print('max: ', int(evolution.score_max[-1]))
         self.plot()
 
@@ -43,9 +46,18 @@ class Evolution:
         plt.plot(x, self.score_max, x, self.score_mean, x, self.score_min)
         plt.show()
 
+    @staticmethod
+    def load_individual(filepath):
+        with open(filepath) as json_data:
+            params = json.load(json_data)
+        return Individual(row_nb=params['row_nb'],
+                          column_nb=params['column_nb'],
+                          cap=params['cap'],
+                          intelligence=NeuralNetwork(**params['intelligence'])
+                          )
+
 
 if __name__ == '__main__':
-
     evolution = Evolution(
         generation_nb=200,
         generation_size=50,
@@ -55,4 +67,3 @@ if __name__ == '__main__':
         cap=7
     )
     evolution.train()
-

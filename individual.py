@@ -87,6 +87,13 @@ class Individual(Kernel):
             'intelligence': self.intelligence.export()
         }
 
-    def save(self, pathfile):
-        with open(pathfile, 'w') as outfile:
+    def save(self, filepath):
+        with open(filepath, 'w') as outfile:
             json.dump(self.export(), outfile)
+
+
+if __name__ == '__main__':
+    ind = Individual(6, 3, 7)
+    filepath = 'test.json'
+    ind.save(filepath)
+    print('ok')
