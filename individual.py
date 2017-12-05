@@ -26,8 +26,11 @@ class Individual(Kernel):
             self.one_play()
         return self.score
 
-    def one_play(self):
-        start_pt, end_pt = self.get_move()
+    def one_play(self, intel):
+        if intel.__name__ == "NN_add":
+            start_pt, end_pt = self.get_move_add()
+        elif intel.__name__ == "NN_mul":
+            start_pt, end_pt = self.get_move_mul()
         not_equal = self.skeleton[start_pt] != self.skeleton[end_pt]
         self.remodeling(start_pt, end_pt)
         if not_equal:
@@ -46,7 +49,7 @@ class Individual(Kernel):
             return condition1 and condition2
         return False
 
-    def get_move(self):
+    def get_move_add(self):
         output = self.neural()
         playground = output[:-4].tolist()
         map_index_pg = list(map(lambda x: playground.index(x), reversed(sorted(playground))))
@@ -59,6 +62,19 @@ class Individual(Kernel):
                 end_pt = start_pt[0] + to_add[0], start_pt[1] + to_add[1]
                 if self.fusible(start_pt, end_pt):
                     return start_pt, end_pt
+        raise Exception
+
+    def get_move_mul(self):
+        output = self.neural()
+        play = output.tolist()
+        map_index_pg = list(map(lambda x: play.index(x), reversed(sorted(play))))
+        for index_pg in map_index_pg:
+            start_pt = self.euclidian(index_pg, 4*self.column_nb)
+            index_dir = self.euclidian(index_pg, 4)[1]
+            to_add = direction_mapper[index_dir]
+            end_pt = start_pt[0] + to_add[0], start_pt[1] + to_add[1]
+            if self.fusible(start_pt, end_pt):
+                return start_pt, end_pt
         raise Exception
 
     @staticmethod
