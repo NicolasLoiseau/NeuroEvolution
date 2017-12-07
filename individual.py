@@ -26,11 +26,13 @@ class Individual(Kernel):
             self.one_play()
         return self.score
 
-    def one_play(self, intel):
-        if intel.__name__ == "NN_add":
+    def one_play(self):
+        if self.intelligence.__name__ == "NN_add":
             start_pt, end_pt = self.get_move_add()
-        elif intel.__name__ == "NN_mul":
+        elif self.intelligence.__name__ == "NN_mul":
             start_pt, end_pt = self.get_move_mul()
+        else:
+            raise Exception
         not_equal = self.skeleton[start_pt] != self.skeleton[end_pt]
         self.remodeling(start_pt, end_pt)
         if not_equal:
@@ -62,7 +64,7 @@ class Individual(Kernel):
                 end_pt = start_pt[0] + to_add[0], start_pt[1] + to_add[1]
                 if self.fusible(start_pt, end_pt):
                     return start_pt, end_pt
-        raise Exception
+        #raise Exception
 
     def get_move_mul(self):
         output = self.neural()
