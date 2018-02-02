@@ -14,6 +14,7 @@ class Individual(Kernel):
         self.move_mapper = self.build_move_mapper()
 
     def build_move_mapper(self):
+        """Map the neural network output with moves."""
         move_mapper = dict()
 
         # up movement
@@ -40,6 +41,7 @@ class Individual(Kernel):
         return normalized.reshape((self.column_nb * self.row_nb,))
 
     def play(self):
+        """Play until the game over."""
         self.reset()
         self.fill()
         while not self.game_over:
@@ -47,6 +49,7 @@ class Individual(Kernel):
         return self.score
 
     def one_play(self):
+        """Play one move."""
         start_pt, end_pt = self.get_move()
         not_equal = self.skeleton[start_pt] != self.skeleton[end_pt]
         self.remodeling(start_pt, end_pt)
@@ -54,19 +57,14 @@ class Individual(Kernel):
             self.refill()
         self.gravity()
 
-    def in_playground(self, point):
-        return -1 < point[0] < self.row_nb and -1 < point[1] < self.column_nb
-
     def fusible(self, start_point, end_point):
-        """Check if the cases (i, j) and (k, l) are fusible.
-        :return:"""
-        if self.in_playground(start_point) and self.in_playground(end_point):
-            condition1 = self[start_point]
-            condition2 = self[start_point] + self[end_point] <= self.cap or self[start_point] == self[end_point]
-            return condition1 and condition2
-        return False
+        """Check if the cases (i, j) and (k, l) are fusible and (i, j) is not empty."""
+        condition1 = self[start_point]
+        condition2 = self[start_point] + self[end_point] <= self.cap or self[start_point] == self[end_point]
+        return condition1 and condition2
 
     def get_move(self):
+        """Find the first possible move according to the neural network output."""
         output = self.neural().tolist()
         map_index = list(map(lambda x: output.index(x), reversed(sorted(output))))
         for index in map_index:
@@ -75,15 +73,12 @@ class Individual(Kernel):
                 return pts[0], pts[1]
         raise Exception
 
-    @staticmethod
-    def euclidian(a, b):
-        r = a % b
-        return int((a - r) / b), int(r)
-
     def neural(self):
+        """The neural network output"""
         return self.intelligence(self.input)
 
     def mutate(self):
+        """Perturb the neural network weights"""
         child = copy.deepcopy(self)
         child.intelligence.mutate()
         return child
@@ -104,14 +99,3 @@ class Individual(Kernel):
     def save(self, filepath):
         with open(filepath, 'w') as outfile:
             json.dump(self.export(), outfile)
-
-
-if __name__ == '__main__':
-    ind = Individual(6, 3, 7)
-    # filepath = 'test.json'
-    # ind.save(filepath)
-    l = list(ind.move_mapper.values())
-    n = np.zeros((6,3))
-    for j in l:
-        n[j[0]] += 1
-    print('ok')
