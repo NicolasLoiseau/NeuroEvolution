@@ -65,9 +65,8 @@ class Individual(Kernel):
 
     def get_move(self):
         """Find the first possible move according to the neural network output."""
-        output = self.neural().tolist()
-        map_index = list(map(lambda x: output.index(x), reversed(sorted(output))))
-        for index in map_index:
+        sorted_index = np.flip(np.argsort(self.neural()), axis=0)
+        for index in sorted_index:
             pts = self.move_mapper[index]
             if self.fusible(pts[0], pts[1]):
                 return pts[0], pts[1]
@@ -99,3 +98,14 @@ class Individual(Kernel):
     def save(self, filepath):
         with open(filepath, 'w') as outfile:
             json.dump(self.export(), outfile)
+
+
+if __name__ == '__main__':
+    ind = Individual(6, 3, 7)
+    # filepath = 'test.json'
+    # ind.save(filepath)
+    l = list(ind.move_mapper.values())
+    n = np.zeros((6, 3))
+    for j in l:
+        n[j[0]] += 1
+    print('ok')
