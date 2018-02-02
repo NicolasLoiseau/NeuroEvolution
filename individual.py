@@ -6,13 +6,33 @@ import numpy as np
 from UnderTheLine.kernel import Kernel
 from neuralNetwork import NeuralNetwork
 
-direction_mapper = {3: (1, 0), 2: (0, 1), 0: (-1, 0), 1: (0, -1)}
-
 
 class Individual(Kernel):
     def __init__(self, row_nb, column_nb, cap, intelligence=None):
         super().__init__(row_nb=row_nb, column_nb=column_nb, cap=cap, a=0)
         self.intelligence = intelligence or NeuralNetwork(row_nb, column_nb)
+        self.move_mapper = self.build_move_mapper()
+
+    def build_move_mapper(self):
+        move_mapper = dict()
+
+        # up movement
+        for i in range(1, self.row_nb):
+            for j in range(self.column_nb):
+                move_mapper[(i - 1) * self.column_nb + j] = [(i, j), (i - 1, j)]
+
+        N = (self.row_nb - 1) * self.column_nb
+        # right movement
+        for i in range(1, self.row_nb):
+            for j in range(self.column_nb - 1):
+                move_mapper[N + (i - 1) * (self.column_nb - 1) + j] = [(i, j), (i, j + 1)]
+
+        M = N + (self.row_nb - 1) * (self.column_nb - 1)
+        # left movement
+        for i in range(1, self.row_nb):
+            for j in range(1, self.column_nb):
+                move_mapper[M + (i - 1) * (self.column_nb - 1) + j - 1] = [(i, j), (i, j - 1)]
+        return move_mapper
 
     @property
     def input(self):
@@ -47,18 +67,12 @@ class Individual(Kernel):
         return False
 
     def get_move(self):
-        output = self.neural()
-        playground = output[:-4].tolist()
-        map_index_pg = list(map(lambda x: playground.index(x), reversed(sorted(playground))))
-        direction = output[-4:].tolist()
-        map_index_dir = list(map(lambda x: direction.index(x), reversed(sorted(direction))))
-        for index_pg in map_index_pg:
-            for index_dir in map_index_dir:
-                start_pt = self.euclidian(index_pg, self.column_nb)
-                to_add = direction_mapper[index_dir]
-                end_pt = start_pt[0] + to_add[0], start_pt[1] + to_add[1]
-                if self.fusible(start_pt, end_pt):
-                    return start_pt, end_pt
+        output = self.neural().tolist()
+        map_index = list(map(lambda x: output.index(x), reversed(sorted(output))))
+        for index in map_index:
+            pts = self.move_mapper[index]
+            if self.fusible(pts[0], pts[1]):
+                return pts[0], pts[1]
         raise Exception
 
     @staticmethod
@@ -94,6 +108,10 @@ class Individual(Kernel):
 
 if __name__ == '__main__':
     ind = Individual(6, 3, 7)
-    filepath = 'test.json'
-    ind.save(filepath)
+    # filepath = 'test.json'
+    # ind.save(filepath)
+    l = list(ind.move_mapper.values())
+    n = np.zeros((6,3))
+    for j in l:
+        n[j[0]] += 1
     print('ok')

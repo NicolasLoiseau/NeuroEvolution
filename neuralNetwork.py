@@ -6,7 +6,7 @@ class NeuralNetwork(object):
         self.column_nb = column_nb
         self.row_nb = row_nb
         self.input_nb = self.column_nb * self.row_nb
-        self.output_nb = self.column_nb * self.row_nb + 4
+        self.output_nb = (self.row_nb - 1) * (3 * self.column_nb - 2)
         self.syn0 = syn0 or 2 * np.random.random((self.input_nb, self.output_nb)) - 1
         self.syn1 = syn1 or 2 * np.random.random((self.output_nb, self.output_nb)) - 1
         self.syn2 = syn2 or 2 * np.random.random((self.output_nb, self.output_nb)) - 1
