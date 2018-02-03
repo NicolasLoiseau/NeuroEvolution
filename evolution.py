@@ -5,6 +5,7 @@ import numpy as np
 
 from individual import Individual
 from neuralNetwork import NeuralNetwork
+from generation import Generation
 
 
 class Evolution:
@@ -15,7 +16,7 @@ class Evolution:
         self.row_nb = row_nb
         self.column_nb = column_nb
         self.cap = cap
-        self.generation = [Individual(row_nb, column_nb, cap) for _ in range(0, generation_size)]
+        self.generation = Generation(generation_size, row_nb, column_nb, cap)
         self.score_mean = list()
         self.score_max = list()
         self.score_min = list()
@@ -23,7 +24,7 @@ class Evolution:
     def nextgen(self):
         scores = np.zeros(self.generation_size)
         for i in range(self.game_per_generation):
-            scores += np.array(list(map(lambda ind: ind.play(), self.generation)))
+            scores += np.array(list(self.generation.play()))
         scores /= self.game_per_generation
         self.score_mean.append(np.mean(scores))
         self.score_max.append(np.max(scores))
