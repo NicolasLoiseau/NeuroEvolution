@@ -30,10 +30,10 @@ class Evolution:
         self.score_max.append(np.max(scores))
         self.score_min.append(np.min(scores))
         median = np.median(scores)
-        newgen = [gen for score, gen in zip(scores, self.generation) if score >= median]
+        newgen = [gen for score, gen in zip(scores, self.generation.individuals) if score >= median]
         for k in range(self.generation_size - len(newgen)):
             newgen.append(newgen[k].mutate())
-        self.generation = newgen
+        self.generation.individuals = newgen
 
     def train(self):
         for i in range(self.generation_nb):
