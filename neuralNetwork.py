@@ -1,7 +1,67 @@
 import numpy as np
+from pycuda import driver, compiler, gpuarray, tools
+
+# -- initialize the device
+import pycuda.autoinit
+
+kernel_code_template = """
+_global_ void MatrixMulKernel(float *a, float *b, float *c)
+{
+    float Pvalue = 0;
+
+    for (int k = 0; k < %(p)s; ++k) {
+        float Aelement = a[blockIdx.x * %(n)s * %(p)s + threadIdx.x * %(p)s + k];
+        float Belement = b[blockIdx.x * %(p)s * %(l)s + k * %(l)s + threadIdx.y];
+        Pvalue += Aelement * Belement;
+    }
+
+    c[blockIdx.x * %(n)s * %(l)s + threadIdx.x * %(l)s + threadIdx.y] = Pvalue;
+}
+"""
+
+
+def gpu_mult(self, a_list, b_list):
+
+    n, p = a_list[0].shape
+    l = b_list[0].shape[1]
+
+    a_cpu = np.concatenate(a_list, axis=0)
+    b_cpu = np.concatenate(b_list, axis=0)
+
+    # transfer host (CPU) memory to device (GPU) memory
+    a_gpu = gpuarray.to_gpu(a_cpu)
+    b_gpu = gpuarray.to_gpu(b_cpu)
+
+    # create empty gpu array for the result (C = A * B)
+    c_gpu = gpuarray.empty((n * self.generation_size, l), np.float32)
+
+    kernel_code = kernel_code_template % {
+        'n': n,
+        'p': p,
+        'l': l
+        }
+
+    # compile the kernel code
+    mod = compiler.SourceModule(kernel_code)
+
+    # get the kernel function from the compiled module
+    matrixmul = mod.get_function("MatrixMulKernel")
+
+    # call the kernel on the card
+    matrixmul(
+        # inputs
+        a_gpu, b_gpu,
+        # output
+        c_gpu,
+        block=(n, l, 1),
+        grid=(self.generation_size, 1)
+    )
+
+    return c_gpu.get()
 
 
 class NeuralNetwork(object):
+
     def __init__(self, row_nb, column_nb, syn0=None, syn1=None, syn2=None):
         self.column_nb = column_nb
         self.row_nb = row_nb
