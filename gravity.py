@@ -2,6 +2,11 @@ import pycuda.driver as cuda
 from pycuda.compiler import SourceModule
 from pycuda import characterize
 import numpy as np
+import pycuda.driver as cuda
+import pycuda.autoinit
+from pycuda.compiler import SourceModule
+import time
+from pycuda import driver, compiler, gpuarray, tools
 
 a = np.zeros((6, 3)).astype(int)
 

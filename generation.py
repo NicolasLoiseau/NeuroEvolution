@@ -209,6 +209,7 @@ if __name__ == '__main__':
         gen = Generation(1, 6, 3, 7)
         #print([i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i])
         gen.fill()
+        gravity_gpu(gen.skeletons)
 
 
 
