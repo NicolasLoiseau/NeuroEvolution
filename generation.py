@@ -72,7 +72,7 @@ class Generation:
         return start_points.astype(int), end_points.astype(int)
 
     def build_move_mapper(self):
-        """Map the neural network output with moves."""
+        """Construct the dictionary to map the neural network output with moves."""
         move_mapper = dict()
 
         # up movement
@@ -94,11 +94,12 @@ class Generation:
         return move_mapper
 
     def get_move(self):
-        """Find the first possible move according to the neural network output."""
+        """Return the moves choosen by the intelligence for each individual."""
         sorted_index = np.flip(np.apply_along_axis(np.argsort, 1, self.neural()), 1)
         return np.apply_along_axis(self.best_move, 1, sorted_index)
 
     def best_move(self, sorted_index):
+        """Find the first possible move according to the neural network output."""
         for index in sorted_index:
             pts = self.move_mapper[index]
             if self.fusible(pts[0], pts[1]):
