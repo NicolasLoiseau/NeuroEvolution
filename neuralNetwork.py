@@ -70,7 +70,7 @@ class NeuralNetwork(object):
         b_gpu = gpuarray.to_gpu(b_cpu.astype(np.float32))
 
         # create empty gpu array for the result (C = A * B)
-        c_gpu = gpuarray.empty((n * self.generation_size, l), np.float32)
+        c_gpu = gpuarray.empty((self.generation_size, n, l), np.float32)
 
         kernel_code = kernel_code_template % {
             'n': n,
