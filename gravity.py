@@ -33,37 +33,36 @@ gravity_kernel_template = """
 
            int ind = 0;
 
-               while (ind < %(l)s)
-               { 
-                   if (a[idb + ((%(l)s - 1) - (ind))* %(c)s + threadIdx.y] == 0)
+           while (ind < %(l)s)
+           { 
+               if (a[idb + ((%(l)s - 1) - (ind))* %(c)s + threadIdx.y] == 0)
+               {
+                   ind++;
+               }
+
+               else
+               {
+                   if (ind == 0)
                    {
                        ind++;
                    }
 
                    else
-                   {
-                       if (ind == 0)
-                       {
+                   {  
+                      if (a[idb + ((%(l)s - 1) - (ind)+1)* %(c)s + threadIdx.y] != 0)
+                      {
                            ind++;
-                       }
+                      }
+                      else
+                      {
+                          int temp = a[idb + ((%(l)s - 1) - (ind))* %(c)s + threadIdx.y];
 
-                       else
-                       {  
-                          if (a[idb + ((%(l)s - 1) - (ind)+1)* %(c)s + threadIdx.y] != 0)
-                          {
-                               ind++;
-                          }
-                          else
-                          {
-                              int temp = a[idb + ((%(l)s - 1) - (ind))* %(c)s + threadIdx.y];
+                          a[idb + ((%(l)s - 1) - (ind)+1)* %(c)s + threadIdx.y] = temp;
 
-                              a[idb + ((%(l)s - 1) - (ind)+1)* %(c)s + threadIdx.y] = temp;
+                          a[idb + ((%(l)s - 1) - (ind))* %(c)s + threadIdx.y] = 0;
 
-                              a[idb + ((%(l)s - 1) - (ind))* %(c)s + threadIdx.y] = 0;
-
-                              ind = 0;
-                       }
-                       }
+                          ind = 0;
+                      }
                    }
                }
            }   
