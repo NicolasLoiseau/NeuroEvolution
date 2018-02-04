@@ -28,8 +28,8 @@ e[0, 1] = 1
 f = np.asarray((a, b, c, d, e))
 
 
-print("-" * 80)
-print(f)
+#print("-" * 80)
+#print(f)
 
 gravity_kernel_template = """
        __global__ void gravity(float *a)
@@ -108,6 +108,6 @@ def gravity_gpu(f):
 
     return f_new
 
-f_test = gravity_gpu(f)
+#f_test = gravity_gpu(f)
 
-print(f_test)
+#print(f_test)

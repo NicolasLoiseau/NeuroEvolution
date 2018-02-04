@@ -54,7 +54,7 @@ class Generation:
                 self.skeletons[i][0, column] = value
 
     def gravity(self):
-        gravity_gpu(self.skeletons)
+        self.skeletons = gravity_gpu(self.skeletons)
 
 
     def one_play(self):
@@ -131,11 +131,12 @@ class Generation:
         return self.intelligence(nn_input)
 
 if __name__ == '__main__':
-    for i in range(0,1):
-        gen = Generation(1, 6, 3, 7)
-        #print([i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i])
-        gen.fill()
-        gravity_gpu(gen.skeletons)
+    gen = Generation(4, 6, 3, 7)
+    #print([i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i])
+    gen.fill()
+    #gravity_gpu(gen.skeletons)
+    moves = gen.get_move()
+    print("ok")
 
 
 
