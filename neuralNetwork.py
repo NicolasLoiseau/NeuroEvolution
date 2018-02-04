@@ -50,7 +50,7 @@ class NeuralNetwork(object):
     def __call__(self, input):
         l1 = self.sigmoid(self.gpu_mult(self.flat(input), self.flat(self.syn0)))
         l2 = self.sigmoid(self.gpu_mult(l1, self.flat(self.syn1)))
-        return self.unflat(self.sigmoid(self.gpu_mult(l2, self.flat(self.syn2))))
+        return self.sigmoid(self.gpu_mult(l2, self.flat(self.syn2)))
 
     def mutate(self, index):
         self.syn0[index] += (2 * np.random.random((self.input_nb, self.output_nb)) - 1) / 5
