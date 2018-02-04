@@ -96,7 +96,7 @@ class Generation:
     def get_move(self):
         """Find the first possible move according to the neural network output."""
         sorted_index = np.flip(np.apply_along_axis(np.argsort, 1, self.neural()), 1)
-        return np.apply_along_axis(self.best_move(), 1, sorted_index)
+        return np.apply_along_axis(self.best_move, 1, sorted_index)
 
     def best_move(self, sorted_index):
         for index in sorted_index:
