@@ -46,9 +46,19 @@ class NeuralNetwork(object):
         return self.sigmoid(self.gpu_mult(l2, self.syn2))
 
     def mutate(self, index):
-        self.syn0[index] += (2 * np.random.random((self.input_nb, self.output_nb)).astype(np.float32) - 1) / 5
-        self.syn1[index] += (2 * np.random.random((self.output_nb, self.output_nb)).astype(np.float32) - 1) / 5
-        self.syn2[index] += (2 * np.random.random((self.output_nb, self.output_nb)).astype(np.float32) - 1) / 5
+
+        self.syn0[:len(index)] = self.syn0[index]
+        self.syn0[len(index):] = self.syn0[index]
+        self.syn0[len(index):] += (2 * np.random.random((self.input_nb, self.output_nb)).astype(np.float32) - 1) / 5
+
+        self.syn1[:len(index)] = self.syn1[index]
+        self.syn1[len(index):] = self.syn1[index]
+        self.syn1[len(index):] += (2 * np.random.random((self.input_nb, self.output_nb)).astype(np.float32) - 1) / 5
+
+        self.syn2[:len(index)] = self.syn2[index]
+        self.syn2[len(index):] = self.syn2[index]
+        self.syn2[len(index):] += (2 * np.random.random((self.input_nb, self.output_nb)).astype(np.float32) - 1) / 5
+
 
     def export(self):
         return {
