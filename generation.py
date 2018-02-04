@@ -181,23 +181,23 @@ class Generation:
 
     def get_move(self):
         """Return the moves choosen by the intelligence for each individual."""
-        sorted_index = np.flip(np.apply_along_axis(np.argsort, 1, self.neural()), 1)
+        sorted_index = np.flip(np.apply_along_axis(np.argsort, 2, self.neural()), 2)
         u, v, w = sorted_index.shape
-        return np.apply_along_axis(self.best_move, 1, sorted_index.reshape(u, w))
+        return np.array([self.best_move(i, index) for i, index in zip(range(u), sorted_index.reshape(u, w))])
 
-    def best_move(self, sorted_index):
+    def best_move(self, i, sorted_index):
         """Find the first possible move according to the neural network output."""
         for index in sorted_index:
             pts = self.move_mapper[index]
-            if self.fusible(index, pts[0], pts[1]):
+            if self.fusible(i, pts[0], pts[1]):
                 return pts[0], pts[1]
         raise Exception
 
-    def fusible(self, index, start_point, end_point):
+    def fusible(self, i, start_point, end_point):
         """Check if the cases (i, j) and (k, l) are fusible and (i, j) is not empty."""
-        condition1 = self.skeletons[index][start_point]
-        condition2 = self.skeletons[index][start_point] + self.skeletons[index][end_point] <= self.skeletons[index].caps[index]
-        condition3 = self.skeletons[index][start_point] == self.skeletons[index][end_point]
+        condition1 = self.skeletons[i][start_point]
+        condition2 = self.skeletons[i][start_point] + self.skeletons[i][end_point] <= self.caps[i]
+        condition3 = self.skeletons[i][start_point] == self.skeletons[i][end_point]
         return condition1 and (condition2 or condition3)
 
     def neural(self):
