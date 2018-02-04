@@ -1,5 +1,6 @@
 import json
 
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -38,13 +39,22 @@ class Evolution:
     def train(self):
         for i in range(self.generation_nb):
             self.nextgen()
-            print(int(100 * i / self.generation_nb), '%')
-            print('max: ', int(evolution.score_max[-1]))
+            r = int(50 * (i + 1) / self.generation_nb)
+            load_bar = '|' + r * '*' + (50 - r) * '_' + '|'
+            maxi = ' max: ' + str(int(self.score_max[-1]))
+            print(load_bar + maxi, end='\r')
         self.plot()
 
     def plot(self):
         x = list(range(self.generation_nb))
-        plt.plot(x, self.score_max, x, self.score_mean, x, self.score_min)
+        plt.plot(x, self.score_max, color='teal')
+        plt.plot(x, self.score_mean, color='orange')
+        plt.plot(x, self.score_min, color='green')
+        max_patch = mpatches.Patch(color='teal', label='max')
+        mean_patch = mpatches.Patch(color='orange', label='mean')
+        min_patch = mpatches.Patch(color='green', label='min')
+
+        plt.legend(handles=[max_patch, mean_patch, min_patch])
         plt.show()
 
     @staticmethod
