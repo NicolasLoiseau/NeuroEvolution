@@ -1,12 +1,10 @@
-import json
-
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 
-from individual import Individual
-from neuralNetwork import NeuralNetwork
 from generation import Generation
+from individual import Individual
+from timeit import timeit
 
 
 class Evolution:
@@ -26,6 +24,7 @@ class Evolution:
         self.score_max = list()
         self.score_min = list()
 
+    @timeit
     def nextgen(self):
         scores = np.zeros(self.generation_size)
         if self.use_gpu:
@@ -46,7 +45,6 @@ class Evolution:
             newgen = [gen for score, gen in zip(scores, self.generation) if score >= median]
             for k in range(self.generation_size - len(newgen)):
                 newgen.append(newgen[k].mutate())
-        if not self.use_gpu:
             self.generation = newgen
 
     def train(self):
@@ -70,25 +68,15 @@ class Evolution:
         plt.legend(handles=[max_patch, mean_patch, min_patch])
         plt.show()
 
-    @staticmethod
-    def load_individual(filepath):
-        with open(filepath) as json_data:
-            params = json.load(json_data)
-        return Individual(row_nb=params['row_nb'],
-                          column_nb=params['column_nb'],
-                          cap=params['cap'],
-                          intelligence=NeuralNetwork(**params['intelligence'])
-                          )
-
 
 if __name__ == '__main__':
     evolution = Evolution(
-        generation_nb=2,
+        generation_nb=20,
         generation_size=50,
         game_per_generation=10,
         row_nb=6,
         column_nb=3,
         cap=7,
-        use_gpu=True
+        use_gpu=False
     )
     evolution.train()

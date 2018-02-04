@@ -1,17 +1,7 @@
-
-# cuda
-import pycuda.driver as cuda
-from pycuda.compiler import SourceModule
-from pycuda import characterize
-
-# numpy
 import numpy as np
 
-# under the line
-from individual import Kernel
-from neuralNetwork import NeuralNetwork
 from gravity import gravity_gpu
-#from remodelling import remodelling_gpu
+from neuralNetworkGPU import NeuralNetworkGPU
 
 
 class Generation:
@@ -20,18 +10,18 @@ class Generation:
         self.row_nb = row_nb
         self.column_nb = column_nb
         self.cap0 = cap
-        self.skeletons = np.zeros((self.generation_size,self.row_nb, self.column_nb)).astype(int)
+        self.skeletons = np.zeros((self.generation_size, self.row_nb, self.column_nb)).astype(int)
         self.scores = np.zeros(self.generation_size)
         self.move_mapper = self.build_move_mapper()
-        self.intelligence = NeuralNetwork(self.generation_size, self.row_nb, self.column_nb)
-        self.moves = np.zeros((self.generation_size,2,2))
+        self.intelligence = NeuralNetworkGPU(self.generation_size, self.row_nb, self.column_nb)
+        self.moves = np.zeros((self.generation_size, 2, 2))
 
     @property
     def caps(self):
-        return np.ones(self.generation_size)*self.cap0 + self.scores // 100
+        return np.ones(self.generation_size) * self.cap0 + self.scores // 100
 
     def reset(self):
-        self.skeletons = np.zeros((self.generation_size,self.row_nb, self.column_nb)).astype(int)
+        self.skeletons = np.zeros((self.generation_size, self.row_nb, self.column_nb)).astype(int)
         self.scores = np.zeros(self.generation_size)
 
     def fill(self):
@@ -64,10 +54,10 @@ class Generation:
     def gravity(self):
         self.skeletons = gravity_gpu(self.skeletons)
 
-
     def one_play(self):
         self.moves = self.get_move()
-        not_equal = [self.skeletons[i][self.start_pt(i)] != self.skeletons[i][self.end_pt(i)] for i in range(self.generation_size)]
+        not_equal = [self.skeletons[i][self.start_pt(i)] != self.skeletons[i][self.end_pt(i)] for i in
+                     range(self.generation_size)]
         play_range = np.where(np.invert(self.game_over))[0]
         play_vec = self.game_over.astype(int)
         self.remodeling(play_range)
@@ -144,13 +134,9 @@ class Generation:
     def end_pt(self, i):
         return self.moves[i, 1, 0], self.moves[i, 1, 1]
 
+
 if __name__ == '__main__':
     gen = Generation(1, 6, 3, 7)
-    #print([i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i])
     gen.fill()
-    #gravity_gpu(gen.skeletons)
+    # gravity_gpu(gen.skeletons)
     gen.play()
-
-
-
-
