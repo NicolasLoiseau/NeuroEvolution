@@ -40,14 +40,13 @@ class Evolution:
         self.score_min.append(np.min(scores))
         median = np.median(scores)
         if self.use_gpu:
-            newgen = [gen for score, gen in zip(scores, self.generation.individuals) if score >= median]
+            index = np.where(scores >= median)
+            self.generation.intelligence.mutate(index)
         else:
             newgen = [gen for score, gen in zip(scores, self.generation) if score >= median]
-        for k in range(self.generation_size - len(newgen)):
-            newgen.append(newgen[k].mutate())
-        if self.use_gpu:
-            self.generation.individuals = newgen
-        else:
+            for k in range(self.generation_size - len(newgen)):
+                newgen.append(newgen[k].mutate())
+        if not self.use_gpu:
             self.generation = newgen
 
     def train(self):
@@ -84,11 +83,12 @@ class Evolution:
 
 if __name__ == '__main__':
     evolution = Evolution(
-        generation_nb=200,
+        generation_nb=2,
         generation_size=50,
         game_per_generation=10,
         row_nb=6,
         column_nb=3,
-        cap=7
+        cap=7,
+        use_gpu=True
     )
     evolution.train()

@@ -11,7 +11,7 @@ import numpy as np
 from individual import Kernel
 from neuralNetwork import NeuralNetwork
 from gravity import gravity_gpu
-from remodelling import remodelling_gpu
+#from remodelling import remodelling_gpu
 
 
 class Generation:
