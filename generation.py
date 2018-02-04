@@ -10,6 +10,8 @@ import numpy as np
 # under the line
 from individual import Kernel
 from neuralNetwork import NeuralNetwork
+from gravity import gravity_gpu
+from remodelling import remodelling_gpu
 
 # Cuda kernel for gravity function
 gravity_kernel_template = """
