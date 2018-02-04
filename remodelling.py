@@ -14,9 +14,7 @@ a[:, :, 0] = 2
 a[0, 1, 2] = 1
 scores = np.array([1000,2000]).astype(int)
 
-spts = np.zeros(generation_size).astype(int)
-
-epts = np.array([5,3]).astype(int)
+moves = np.array([[[0,0],[0,1]],[0,0][0,1]])
 
 play_vect = np.ones(generation_size).astype(int)
 
@@ -24,21 +22,24 @@ caps = np.array([5,5])
 
 print(a)
 print(scores)
-print(spts)
-print(epts)
+print(moves)
 print(play_vect)
 print(caps)
 # Cuda kernel
 remodelling_kernel_template = """
-    __global__ void Remodelling(float *a, int *spts, int *epts, int *scores, int *caps, int *vect_play)
+    __global__ void Remodelling(float *a, int *moves, int *scores, int *caps, int *vect_play)
     {
         if (vect_play[threadIdx.x] == 1)
         {
             int temp = 0;
+            
+            int spt = moves[4*threadIdx.x] * %(l)s + moves[threadIdx.x + 1]
+            
+            int ept = moves[4*threadIdx.x + 2] * %(l)s + moves[threadIdx.x + 3]
 
-            int ids = threadIdx.x * %(l)s * %(c)s +  spts[threadIdx.x];
+            int ids = threadIdx.x * %(l)s * %(c)s +   spt;
 
-            int ide = threadIdx.x * %(l)s * %(c)s +  epts[threadIdx.x];
+            int ide = threadIdx.x * %(l)s * %(c)s +  ept;
 
             temp = a[ids];
 
@@ -59,7 +60,7 @@ remodelling_kernel_template = """
     }
     """
 
-def remodelling_gpu(a, spts, epts, scores, caps, play_vect, cap0=5):
+def remodelling_gpu(a, moves, scores, caps, play_vect, cap0=5):
 
     # Constants
     g = a.shape[0]
@@ -69,24 +70,21 @@ def remodelling_gpu(a, spts, epts, scores, caps, play_vect, cap0=5):
     # Define type for gpu computation
     a = a.astype(np.float32)
     scores = scores.astype(np.int32)
-    spts = spts.astype(np.int32)
-    epts = epts.astype(np.int32)
+    moves = moves.astype(np.int32)
     play_vect = play_vect.astype(np.int32)
     caps = caps.astype(np.int32)
 
     # Create memory space on device
     a_gpu = cuda.mem_alloc(a.nbytes)
     scores_gpu = cuda.mem_alloc(scores.nbytes)
-    spts_gpu = cuda.mem_alloc(spts.nbytes)
-    epts_gpu = cuda.mem_alloc(epts.nbytes)
+    moves_gpu = cuda.mem_alloc(moves.nbytes)
     play_vect_gpu = cuda.mem_alloc(play_vect.nbytes)
     caps_gpu = cuda.mem_alloc(caps.nbytes)
 
     # Copy items on device
     cuda.memcpy_htod(a_gpu, a)
     cuda.memcpy_htod(scores_gpu, scores)
-    cuda.memcpy_htod(spts_gpu, spts)
-    cuda.memcpy_htod(epts_gpu, epts)
+    cuda.memcpy_htod(moves_gpu, moves)
     cuda.memcpy_htod(play_vect_gpu, play_vect)
     cuda.memcpy_htod(caps_gpu, caps)
 
@@ -103,7 +101,7 @@ def remodelling_gpu(a, spts, epts, scores, caps, play_vect, cap0=5):
     func = mod.get_function("Remodelling")
 
     # Apply function (on GPU)
-    func(a_gpu, spts_gpu, epts_gpu, scores_gpu, caps_gpu, play_vect_gpu, grid=(1, 1), block=(g, 1, 1))
+    func(a_gpu, moves_gpu, scores_gpu, caps_gpu, play_vect_gpu, grid=(1, 1), block=(g, 1, 1))
 
     # Copy results back from device
     cuda.memcpy_dtoh(a_new, a_gpu)
@@ -112,7 +110,7 @@ def remodelling_gpu(a, spts, epts, scores, caps, play_vect, cap0=5):
 
     return a_new, scores_new, caps_new
 
-test, scores, caps = remodelling_gpu(a, spts, epts, scores, caps, play_vect)
+test, scores, caps = remodelling_gpu(a, moves, scores, caps, play_vect)
 
 print(test)
 print(scores)
