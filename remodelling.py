@@ -20,15 +20,15 @@ play_vect = np.ones(generation_size).astype(int)
 
 caps = np.array([5,5])
 
-#print(a)
-#print(scores)
-#print(moves)
-#print(play_vect)
-#print(caps)
+print(a)
+print(scores)
+print(moves)
+print(play_vect)
+print(caps)
 
 # Cuda kernel
 remodelling_kernel_template = """
-    __global__ void Remodelling(float *a, int *moves, int *scores, int *caps, int *vect_play)
+    __global__ void Remodeling(float *a, int *moves, int *scores, int *caps, int *vect_play)
     {
         if (vect_play[threadIdx.x] == 1)
         {
@@ -99,7 +99,7 @@ def remodeling_gpu(a, moves, scores, caps, play_vect, cap0=5):
     mod = SourceModule(remodelling_kernel)
 
     # Define function form kernel (on GPU)
-    func = mod.get_function("Remodelling")
+    func = mod.get_function("Remodeling")
 
     # Apply function (on GPU)
     func(a_gpu, moves_gpu, scores_gpu, caps_gpu, play_vect_gpu, grid=(1, 1), block=(g, 1, 1))
@@ -111,8 +111,8 @@ def remodeling_gpu(a, moves, scores, caps, play_vect, cap0=5):
 
     return a_new, scores_new, caps_new
 
-#test, scores, caps = remodelling_gpu(a, moves, scores, caps, play_vect)
+test, scores, caps = remodeling_gpu(a, moves, scores, caps, play_vect)
 
-#print(test)
-#print(scores)
-#print(caps)
+print(test)
+print(scores)
+print(caps)

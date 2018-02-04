@@ -11,7 +11,7 @@ import numpy as np
 from individual import Kernel
 from neuralNetwork import NeuralNetwork
 from gravity import gravity_gpu
-from remodelling import remodeling_gpu
+#from remodelling import remodeling_gpu
 
 
 class Generation:
@@ -140,7 +140,7 @@ class Generation:
         return self.moves[i, 1, 0], self.moves[i, 1, 1]
 
 if __name__ == '__main__':
-    gen = Generation(1, 6, 3, 7)
+    gen = Generation(50, 50, 10, 7)
     #print([i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i])
     gen.fill()
     #gravity_gpu(gen.skeletons)
