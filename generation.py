@@ -25,18 +25,12 @@ class Generation:
             self.individuals[i].skeleton[: self.row_nb - height, :] = 0
             self.individuals[i].skeleton[self.row_nb - height:, :] = sub_skeleton[i]
 
-    def check_level(self, level):
-        s = 0
-        for i in range(0,self.generation_size):
-            s += self.individuals[i].skeleton.sum(axis=1)[:level].sum()
-        return s == 0
-
     @property
     def game_over(self):
-        return not self.check_level(1)
+        return [self.individuals[i].skeleton.sum(axis=1)[:1].sum() != 0 for i in range(0, self.generation_size)]
 
-    def remodeling(self, start_point, end_point):
-        for i in range(0, self.generation_size):
+    def remodeling(self, start_point, end_point, play_range):
+        for i in play_range:
             if self.individuals[i].skeleton[end_point[i][0]][end_point[i][1]] != self.individuals[i].skeleton[start_point[i][0]][start_point[i][1]]:
                 self.individuals[i].update_dashboard(self.individuals[i].skeleton[start_point[i][0]][start_point[i][1]] + self.individuals[i].skeleton[end_point[i][0]][end_point[i][1]])
                 self.individuals[i].skeleton[end_point[i][0]][end_point[i][1]] += self.individuals[i].skeleton[start_point[i][0]][start_point[i][1]]
@@ -44,8 +38,8 @@ class Generation:
                 self.individuals[i].update_dashboard(2 * self.individuals[i].skeleton[start_point[i][0]][start_point[i][1]])
             self.individuals[i].skeleton[start_point[i][0]][start_point[i][1]] = 0
 
-    def refill(self, not_equal):
-        for i in range(0, self.generation_size):
+    def refill(self, not_equal, play_range):
+        for i in play_range:
             if not_equal[i]:
                 column = np.random.randint(0, self.column_nb - 1)
                 values = [1, 1, 2, 2, self.cap, self.cap - 1]
@@ -61,14 +55,15 @@ class Generation:
     def one_play(self):
         start_pt, end_pt = self.get_move()
         not_equal = [self.individuals[i].skeleton[start_pt[i][0]][start_pt[i][1]] != self.individuals[i].skeleton[end_pt[i][0]][end_pt[i][1]] for i in range(0, self.generation_size)]
-        self.remodeling(start_pt, end_pt)
-        self.refill(not_equal)
+        play_range = np.where(np.invert(self.game_over))[0]
+        self.remodeling(start_pt, end_pt, play_range)
+        self.refill(not_equal, play_range)
         self.gravity()
 
     def play(self):
         self.reset()
         self.fill()
-        while not self.game_over:
+        while not all(self.game_over):
             self.one_play()
         return self.score
 
@@ -80,3 +75,14 @@ class Generation:
             start_points[i] = start_point
             end_points[i] = end_point
         return start_points.astype(int), end_points.astype(int)
+
+
+
+for i in range(0,200):
+    gen = Generation(1, 6, 3, 7)
+    gen.play()
+
+#gen.fill()
+#print(gen.individuals[0].skeleton)
+#print(gen.individuals[1].skeleton)
+
