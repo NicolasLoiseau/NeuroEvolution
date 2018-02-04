@@ -11,7 +11,7 @@ import numpy as np
 from individual import Kernel
 from neuralNetwork import NeuralNetwork
 from gravity import gravity_gpu
-from remodelling import remodelling_gpu
+from remodelling import remodeling_gpu
 
 
 class Generation:
@@ -44,13 +44,8 @@ class Generation:
         return self.skeletons.sum(axis=2)[:, 0] != 0
 
     def remodeling(self, play_range):
-        for i in play_range:
-            if self.skeletons[i][self.end_pt(i)] != self.skeletons[i][self.start_pt(i)]:
-                self.scores[i] += (self.skeletons[i][self.start_pt(i)] + self.skeletons[i][self.end_pt(i)])
-                self.skeletons[i][self.end_pt(i)] += self.skeletons[i][self.start_pt(i)]
-            else:
-                self.scores[i] += (2 * self.skeletons[i][self.start_pt(i)])
-            self.skeletons[i][self.start_pt(i)] = 0
+        self.skeletons, caps, self.scores = remodeling_gpu(self.skeletons, self.moves, self.scores, self.caps, play_range, cap0=self.cap0)
+
 
     def refill(self, not_equal, play_range):
         for i in play_range:
@@ -150,6 +145,7 @@ if __name__ == '__main__':
     gen.fill()
     #gravity_gpu(gen.skeletons)
     gen.play()
+    print('ok')
 
 
 

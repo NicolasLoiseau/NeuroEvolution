@@ -14,17 +14,18 @@ a[:, :, 0] = 2
 a[0, 1, 2] = 1
 scores = np.array([1000,2000]).astype(int)
 
-moves = np.array([[[0,0],[0,1]],[0,0][0,1]])
+moves = np.array([[[0,0],[0,1]],[[0,0],[1,0]]])
 
 play_vect = np.ones(generation_size).astype(int)
 
 caps = np.array([5,5])
 
-print(a)
-print(scores)
-print(moves)
-print(play_vect)
-print(caps)
+#print(a)
+#print(scores)
+#print(moves)
+#print(play_vect)
+#print(caps)
+
 # Cuda kernel
 remodelling_kernel_template = """
     __global__ void Remodelling(float *a, int *moves, int *scores, int *caps, int *vect_play)
@@ -33,9 +34,9 @@ remodelling_kernel_template = """
         {
             int temp = 0;
             
-            int spt = moves[4*threadIdx.x] * %(l)s + moves[threadIdx.x + 1]
+            int spt = moves[4 * threadIdx.x] * %(l)s + moves[4 * threadIdx.x + 1];
             
-            int ept = moves[4*threadIdx.x + 2] * %(l)s + moves[threadIdx.x + 3]
+            int ept = moves[4 * threadIdx.x + 2] * %(l)s + moves[4 * threadIdx.x + 3];
 
             int ids = threadIdx.x * %(l)s * %(c)s +   spt;
 
@@ -60,7 +61,7 @@ remodelling_kernel_template = """
     }
     """
 
-def remodelling_gpu(a, moves, scores, caps, play_vect, cap0=5):
+def remodeling_gpu(a, moves, scores, caps, play_vect, cap0=5):
 
     # Constants
     g = a.shape[0]
@@ -110,8 +111,8 @@ def remodelling_gpu(a, moves, scores, caps, play_vect, cap0=5):
 
     return a_new, scores_new, caps_new
 
-test, scores, caps = remodelling_gpu(a, moves, scores, caps, play_vect)
+#test, scores, caps = remodelling_gpu(a, moves, scores, caps, play_vect)
 
-print(test)
-print(scores)
-print(caps)
+#print(test)
+#print(scores)
+#print(caps)
