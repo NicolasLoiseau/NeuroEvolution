@@ -73,6 +73,9 @@ class Evolution:
         min_patch = mpatches.Patch(color='green', label='min')
 
         plt.legend(handles=[max_patch, mean_patch, min_patch])
+        plt.xlabel('generation')
+        plt.ylabel('score')
+
         plt.show()
 
 
