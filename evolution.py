@@ -29,14 +29,12 @@ class Evolution:
         scores = np.zeros(self.generation_size)
         if self.use_gpu:
             for i in range(self.game_per_generation):
-                scores += np.array(list(self.generation.play()))
+                scores += self.generation.play()
         else:
             for i in range(self.game_per_generation):
                 scores += np.array(list(map(lambda ind: ind.play(), self.generation)))
         scores /= self.game_per_generation
-        self.score_mean.append(np.mean(scores))
-        self.score_max.append(np.max(scores))
-        self.score_min.append(np.min(scores))
+        self.save_scores(scores)
         index = np.argsort(scores)[:self.generation_size//2].shape
         if self.use_gpu:
             self.generation.intelligence.mutate(index)
@@ -45,6 +43,11 @@ class Evolution:
             for k in range(self.generation_size - len(newgen)):
                 newgen.append(newgen[k].mutate())
             self.generation = newgen
+
+    def save_scores(self, scores):
+        self.score_mean.append(np.mean(scores))
+        self.score_max.append(np.max(scores))
+        self.score_min.append(np.min(scores))
 
     def train(self):
         for i in range(self.generation_nb):
