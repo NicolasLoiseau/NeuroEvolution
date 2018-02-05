@@ -1,8 +1,7 @@
-import pycuda.driver as cuda
-import pycuda.autoinit
-from pycuda.compiler import SourceModule
 import numpy as np
-
+import pycuda.autoinit
+import pycuda.driver as cuda
+from pycuda.compiler import SourceModule
 
 # Cuda kernel
 remodelling_kernel_template = """
@@ -38,6 +37,7 @@ remodelling_kernel_template = """
         }
     }
     """
+
 
 def remodeling_gpu(a, moves, scores, caps, play_vect, cap0=5):
     """move (i,j) to (k,l) for every individual using gpu"""
@@ -88,40 +88,3 @@ def remodeling_gpu(a, moves, scores, caps, play_vect, cap0=5):
     cuda.memcpy_dtoh(caps_new, caps_gpu)
 
     return a_new, scores_new, caps_new
-
-
-
-if __name__ == '__main__':
-    print('remodelling test run')
-    print('-' * 80)
-
-    generation_size = 2
-    a = np.zeros((generation_size, 6, 3)).astype(int)
-    a[:, :, 0] = 2
-    a[0, 1, 2] = 1
-    a = np.random.randint(10, size=(2,6,3))
-    scores = np.array([1000,2000]).astype(int)
-    moves = np.array([[[2,2],[1,2]],[[0,0],[1,0]]])
-    play_vect = np.zeros(generation_size).astype(int)
-    caps = np.array([5,5])
-
-    print('-' * 80)
-    print('datas')
-    print(a)
-    print('scores')
-    print(scores)
-    print('moves')
-    print(moves)
-    print('play_vect')
-    print(play_vect)
-    print('caps')
-    print(caps)
-
-    print('-' * 80)
-    print('results')
-    test, scores, caps = remodeling_gpu(a, moves, scores, caps, play_vect)
-    print(test)
-    print('scores')
-    print(scores)
-    print('caps')
-    print(caps)

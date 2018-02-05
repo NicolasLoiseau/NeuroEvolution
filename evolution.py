@@ -1,15 +1,16 @@
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
+import pycuda.autoinit
 from pycuda import driver
 
 from generation import Generation
 from individual import Individual
-from timeit import timeit
-import pycuda.autoinit
 
 
 class Evolution:
+    """Manage all the generations."""
+
     def __init__(self, generation_nb, generation_size, game_per_generation, row_nb, column_nb, cap, use_gpu=False):
         self.generation_nb = generation_nb
         self.generation_size = generation_size
@@ -19,7 +20,8 @@ class Evolution:
         self.cap = cap
         self.use_gpu = use_gpu
         if self.use_gpu:
-            self.skeletons_gpu = driver.mem_alloc(np.ones((self.generation_size, self.row_nb, self.column_nb)).astype(np.float32).nbytes)
+            self.skeletons_gpu = driver.mem_alloc(
+                np.ones((self.generation_size, self.row_nb, self.column_nb)).astype(np.float32).nbytes)
             self.generation = Generation(generation_size, row_nb, column_nb, cap, self.skeletons_gpu)
         else:
             self.generation = [Individual(row_nb, column_nb, cap) for _ in range(0, generation_size)]
@@ -28,6 +30,7 @@ class Evolution:
         self.score_min = list()
 
     def nextgen(self):
+        """Next generation."""
         scores = np.zeros(self.generation_size)
         if self.use_gpu:
             for i in range(self.game_per_generation):
@@ -37,7 +40,7 @@ class Evolution:
                 scores += np.array(list(map(lambda ind: ind.play(), self.generation)))
         scores /= self.game_per_generation
         self.save_scores(scores)
-        index = np.argsort(scores)[self.generation_size//2:]
+        index = np.argsort(scores)[self.generation_size // 2:]
         if self.use_gpu:
             self.generation.intelligence.mutate(index)
         else:

@@ -8,6 +8,8 @@ from neuralNetwork import NeuralNetwork
 
 
 class Individual(Kernel):
+    """Artificial intelligence."""
+
     def __init__(self, row_nb, column_nb, cap, intelligence=None):
         super().__init__(row_nb=row_nb, column_nb=column_nb, cap=cap, a=0)
         self.intelligence = intelligence or NeuralNetwork(row_nb, column_nb)
@@ -99,13 +101,3 @@ class Individual(Kernel):
         with open(filepath, 'w') as outfile:
             json.dump(self.export(), outfile)
 
-
-if __name__ == '__main__':
-    ind = Individual(6, 3, 7)
-    # filepath = 'test.json'
-    # ind.save(filepath)
-    l = list(ind.move_mapper.values())
-    n = np.zeros((6, 3))
-    for j in l:
-        n[j[0]] += 1
-    print('ok')

@@ -16,11 +16,13 @@ class NeuralNetwork(object):
         return 1 / (1 + np.exp(-x))
 
     def __call__(self, input):
+        """Return nn(input)."""
         l1 = self.sigmoid(np.dot(input, self.syn0))
         l2 = self.sigmoid(np.dot(l1, self.syn1))
         return self.sigmoid(np.dot(l2, self.syn2))
 
     def mutate(self):
+        """Mutate the weights of the neural network."""
         self.syn0 += (2 * np.random.random((self.input_nb, self.output_nb)) - 1) / 10
         self.syn1 += (2 * np.random.random((self.output_nb, self.output_nb)) - 1) / 10
         self.syn2 += (2 * np.random.random((self.output_nb, self.output_nb)) - 1) / 10

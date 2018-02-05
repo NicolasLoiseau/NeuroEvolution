@@ -6,6 +6,8 @@ from remodeling import remodeling_gpu
 
 
 class Generation:
+    """Generation of individuals."""
+
     def __init__(self, generation_size, row_nb, column_nb, cap, skeletons_gpu):
         self.generation_size = generation_size
         self.row_nb = row_nb
@@ -36,19 +38,9 @@ class Generation:
         return self.skeletons.sum(axis=2)[:, 0] != 0
 
     def remodeling(self, play_range):
-        self.skeletons, self.scores, caps = remodeling_gpu(self.skeletons, self.moves, self.scores, self.caps, play_range, cap0=self.cap0)
-
-    def old_remodeling(self, play_range):
-        """Remodeling function that does not use gpu
-            Not used but kept in case of need for benchmarking
-            use play_ange and not play_vec as argument"""
-        for i in play_range:
-            if self.skeletons[i][self.end_pt(i)] != self.skeletons[i][self.start_pt(i)]:
-                self.scores[i] += (self.skeletons[i][self.start_pt(i)] + self.skeletons[i][self.end_pt(i)])
-                self.skeletons[i][self.end_pt(i)] += self.skeletons[i][self.start_pt(i)]
-            else:
-                self.scores[i] += (2 * self.skeletons[i][self.start_pt(i)])
-            self.skeletons[i][self.start_pt(i)] = 0
+        """Update the playground, the score and the cap."""
+        self.skeletons, self.scores, caps = remodeling_gpu(self.skeletons, self.moves, self.scores, self.caps,
+                                                           play_range, cap0=self.cap0)
 
     def refill(self, not_equal, play_range):
         for i in play_range:
@@ -78,15 +70,6 @@ class Generation:
         while not all(self.game_over):
             self.one_play()
         return self.scores
-
-    def old_get_move(self):
-        start_points = np.zeros((self.generation_size, 2))
-        end_points = np.zeros((self.generation_size, 2))
-        for i in range(self.generation_size):
-            start_point, end_point = self.individuals[i].get_move()
-            start_points[i] = start_point
-            end_points[i] = end_point
-        return start_points.astype(int), end_points.astype(int)
 
     def build_move_mapper(self):
         """Construct the dictionary to map the neural network output with moves."""
@@ -142,8 +125,3 @@ class Generation:
     def end_pt(self, i):
         return self.moves[i, 1, 0], self.moves[i, 1, 1]
 
-
-if __name__ == '__main__':
-    gen = Generation(1, 6, 3, 7)
-    gen.fill()
-    gen.play()

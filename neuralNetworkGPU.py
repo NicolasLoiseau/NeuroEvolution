@@ -1,9 +1,6 @@
 import numpy as np
-from pycuda import driver, compiler, gpuarray, tools
-
-# -- initialize the device
 import pycuda.autoinit
-
+from pycuda import driver, compiler, gpuarray
 
 kernel_code_template = """
 __global__ void MatrixMulKernel(float *a, float *b, float *c)
@@ -22,7 +19,7 @@ __global__ void MatrixMulKernel(float *a, float *b, float *c)
 
 
 class NeuralNetworkGPU(object):
-
+    """NeuralNetwork parallelized on GPU"""
     def __init__(self, generation_size, row_nb, column_nb, skeletons_gpu, syn0=None, syn1=None, syn2=None):
         self.generation_size = generation_size
         self.column_nb = column_nb
@@ -34,9 +31,12 @@ class NeuralNetworkGPU(object):
         self.syn2 = syn2 or self.syn_init(self.output_nb, self.output_nb)
         self.skeletons_gpu = skeletons_gpu
         self.output_gpu = driver.mem_alloc(np.ones((self.generation_size, 1, self.output_nb)).astype(np.float32).nbytes)
-        self.syn0_gpu = driver.mem_alloc(np.ones((self.generation_size, self.input_nb, self.output_nb)).astype(np.float32).nbytes)
-        self.syn1_gpu = driver.mem_alloc(np.ones((self.generation_size, self.output_nb, self.output_nb)).astype(np.float32).nbytes)
-        self.syn2_gpu = driver.mem_alloc(np.ones((self.generation_size, self.output_nb, self.output_nb)).astype(np.float32).nbytes)
+        self.syn0_gpu = driver.mem_alloc(
+            np.ones((self.generation_size, self.input_nb, self.output_nb)).astype(np.float32).nbytes)
+        self.syn1_gpu = driver.mem_alloc(
+            np.ones((self.generation_size, self.output_nb, self.output_nb)).astype(np.float32).nbytes)
+        self.syn2_gpu = driver.mem_alloc(
+            np.ones((self.generation_size, self.output_nb, self.output_nb)).astype(np.float32).nbytes)
 
     def syn_init(self, x, y):
         return np.array([2 * np.random.random((x, y)) - 1 for _ in range(self.generation_size)]).astype(np.float32)
@@ -51,31 +51,26 @@ class NeuralNetworkGPU(object):
         return self.sigmoid(self.gpu_mult(l2, self.syn2, self.output_gpu, self.syn2_gpu))
 
     def mutate(self, index):
+        """Keep the nn in index and replace the others with mutations."""
         l = len(index)
 
         self.syn0[:l] = self.syn0[index]
         self.syn0[l:] = self.syn0[index]
-        self.syn0[l:] += np.array([(2 * np.random.random((self.input_nb, self.output_nb)) - 1) / 5 for i in range(l)]).astype(np.float32)
+        self.syn0[l:] += np.array(
+            [(2 * np.random.random((self.input_nb, self.output_nb)) - 1) / 5 for i in range(l)]).astype(np.float32)
 
         self.syn1[:l] = self.syn1[index]
         self.syn1[l:] = self.syn1[index]
-        self.syn1[l:] += np.array([(2 * np.random.random((self.output_nb, self.output_nb)) - 1) / 5 for i in range(l)]).astype(np.float32)
+        self.syn1[l:] += np.array(
+            [(2 * np.random.random((self.output_nb, self.output_nb)) - 1) / 5 for i in range(l)]).astype(np.float32)
 
         self.syn2[:l] = self.syn2[index]
         self.syn2[l:] = self.syn2[index]
-        self.syn2[l:] += np.array([(2 * np.random.random((self.output_nb, self.output_nb)) - 1) / 5 for i in range(l)]).astype(np.float32)
-
-    def export(self):
-        return {
-            'column_nb': self.column_nb,
-            'row_nb': self.row_nb,
-            'syn0': self.syn0.tolist(),
-            'syn1': self.syn1.tolist(),
-            'syn2': self.syn2.tolist()
-        }
+        self.syn2[l:] += np.array(
+            [(2 * np.random.random((self.output_nb, self.output_nb)) - 1) / 5 for i in range(l)]).astype(np.float32)
 
     def gpu_mult(self, a_cpu, b_cpu, a_gpu, b_gpu):
-
+        """Store a_cpu and b_cpu into a_gpu and b_gpu and compute the multiplication in the GPU."""
         n = a_cpu.shape[1]
         p = a_cpu.shape[2]
         l = b_cpu.shape[2]
