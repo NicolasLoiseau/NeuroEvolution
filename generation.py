@@ -2,7 +2,8 @@ import numpy as np
 
 from gravity import gravity_gpu
 from neuralNetworkGPU import NeuralNetworkGPU
-from timeit import timeit
+from remodeling import remodeling_gpu
+
 
 class Generation:
     def __init__(self, generation_size, row_nb, column_nb, cap, skeletons_gpu):
@@ -35,6 +36,12 @@ class Generation:
         return self.skeletons.sum(axis=2)[:, 0] != 0
 
     def remodeling(self, play_range):
+        self.skeletons, self.scores, caps = remodeling_gpu(self.skeletons, self.moves, self.scores, self.caps, play_range, cap0=self.cap0)
+
+    def old_remodeling(self, play_range):
+        """Remodeling function that does not use gpu
+            Not used but kept in case of need for benchmarking
+            use play_ange and not play_vec as argument"""
         for i in play_range:
             if self.skeletons[i][self.end_pt(i)] != self.skeletons[i][self.start_pt(i)]:
                 self.scores[i] += (self.skeletons[i][self.start_pt(i)] + self.skeletons[i][self.end_pt(i)])
@@ -61,7 +68,7 @@ class Generation:
                      range(self.generation_size)]
         play_range = np.where(np.invert(self.game_over))[0]
         play_vec = self.game_over.astype(int)
-        self.remodeling(play_range)
+        self.remodeling(play_vec)
         self.refill(not_equal, play_range)
         self.gravity()
 
@@ -139,5 +146,4 @@ class Generation:
 if __name__ == '__main__':
     gen = Generation(1, 6, 3, 7)
     gen.fill()
-    # gravity_gpu(gen.skeletons)
     gen.play()

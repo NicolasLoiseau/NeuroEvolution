@@ -65,7 +65,6 @@ class NeuralNetworkGPU(object):
         self.syn2[l:] = self.syn2[index]
         self.syn2[l:] += np.array([(2 * np.random.random((self.output_nb, self.output_nb)) - 1) / 5 for i in range(l)]).astype(np.float32)
 
-
     def export(self):
         return {
             'column_nb': self.column_nb,

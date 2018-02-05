@@ -27,25 +27,24 @@ class Evolution:
         self.score_max = list()
         self.score_min = list()
 
-    @timeit
     def nextgen(self):
-            scores = np.zeros(self.generation_size)
-            if self.use_gpu:
-                for i in range(self.game_per_generation):
-                    scores += self.generation.play()
-            else:
-                for i in range(self.game_per_generation):
-                    scores += np.array(list(map(lambda ind: ind.play(), self.generation)))
-            scores /= self.game_per_generation
-            self.save_scores(scores)
-            index = np.argsort(scores)[:self.generation_size//2].shape
-            if self.use_gpu:
-                self.generation.intelligence.mutate(index)
-            else:
-                newgen = [gen for i, gen in zip(range(self.generation_size), self.generation) if i in index]
-                for k in range(self.generation_size - len(newgen)):
-                    newgen.append(newgen[k].mutate())
-                self.generation = newgen
+        scores = np.zeros(self.generation_size)
+        if self.use_gpu:
+            for i in range(self.game_per_generation):
+                scores += self.generation.play()
+        else:
+            for i in range(self.game_per_generation):
+                scores += np.array(list(map(lambda ind: ind.play(), self.generation)))
+        scores /= self.game_per_generation
+        self.save_scores(scores)
+        index = np.argsort(scores)[self.generation_size//2:]
+        if self.use_gpu:
+            self.generation.intelligence.mutate(index)
+        else:
+            newgen = [gen for i, gen in zip(range(self.generation_size), self.generation) if i in index]
+            for k in range(self.generation_size - len(newgen)):
+                newgen.append(newgen[k].mutate())
+            self.generation = newgen
 
     def save_scores(self, scores):
         self.score_mean.append(np.mean(scores))
@@ -76,7 +75,7 @@ class Evolution:
 
 if __name__ == '__main__':
     evolution = Evolution(
-        generation_nb=10,
+        generation_nb=30,
         generation_size=50,
         game_per_generation=10,
         row_nb=6,

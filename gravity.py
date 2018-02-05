@@ -1,35 +1,8 @@
-import pycuda.driver as cuda
-from pycuda.compiler import SourceModule
-from pycuda import characterize
 import numpy as np
 import pycuda.driver as cuda
 import pycuda.autoinit
 from pycuda.compiler import SourceModule
-import time
-from pycuda import driver, compiler, gpuarray, tools
 
-a = np.zeros((6, 3)).astype(int)
-
-
-b = a.copy()
-b[0, :] = 1
-
-c = np.ones((6, 3)).astype(int)
-c[1, :] = 1
-
-d = a.copy()
-d[0:4, :] = 1
-
-e = a.copy()
-e[1, [0, 2]] = 1
-e[2, 1] = 1
-e[0, 1] = 1
-
-f = np.asarray((a, b, c, d, e))
-
-
-#print("-" * 80)
-#print(f)
 
 gravity_kernel_template = """
        __global__ void gravity(float *a)
@@ -74,6 +47,7 @@ gravity_kernel_template = """
        }
        """
 
+
 def gravity_gpu(f):
 
     # Constants
@@ -108,6 +82,26 @@ def gravity_gpu(f):
 
     return f_new
 
-#f_test = gravity_gpu(f)
 
-#print(f_test)
+if __name__ == '__main__':
+    print('gravity test run')
+    # Input definition
+    a = np.zeros((6, 3)).astype(int)
+    b = a.copy()
+    b[0, :] = 1
+    c = np.ones((6, 3)).astype(int)
+    c[1, :] = 1
+    d = a.copy()
+    d[0:4, :] = 1
+    e = a.copy()
+    e[1, [0, 2]] = 1
+    e[2, 1] = 1
+    e[0, 1] = 1
+    f = np.asarray((a, b, c, d, e))
+    print("-" * 80)
+    print(f)
+    print("-" * 80)
+    # Apply function
+    f_test = gravity_gpu(f)
+    print('Result of distributed gravity')
+    print(f_test)
