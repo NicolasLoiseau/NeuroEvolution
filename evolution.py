@@ -71,12 +71,12 @@ class Evolution:
 
 if __name__ == '__main__':
     evolution = Evolution(
-        generation_nb=20,
-        generation_size=50,
+        generation_nb=10,
+        generation_size=10,
         game_per_generation=10,
         row_nb=6,
         column_nb=3,
         cap=7,
-        use_gpu=False
+        use_gpu=True
     )
     evolution.train()

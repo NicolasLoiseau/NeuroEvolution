@@ -8,13 +8,13 @@ import numpy as np
 remodelling_kernel_template = """
     __global__ void Remodeling(float *a, int *moves, int *scores, int *caps, int *vect_play)
     {
-        if (vect_play[threadIdx.x] == 1)
+        if (vect_play[threadIdx.x] == 0)
         {
             int temp = 0;
             
-            int spt = moves[4 * threadIdx.x] * %(l)s + moves[4 * threadIdx.x + 1];
+            int spt = moves[4 * threadIdx.x] * %(c)s + moves[4 * threadIdx.x + 1];
             
-            int ept = moves[4 * threadIdx.x + 2] * %(l)s + moves[4 * threadIdx.x + 3];
+            int ept = moves[4 * threadIdx.x + 2] * %(c)s + moves[4 * threadIdx.x + 3];
 
             int ids = threadIdx.x * %(l)s * %(c)s +   spt;
 
@@ -99,9 +99,10 @@ if __name__ == '__main__':
     a = np.zeros((generation_size, 6, 3)).astype(int)
     a[:, :, 0] = 2
     a[0, 1, 2] = 1
+    a = np.random.randint(10, size=(2,6,3))
     scores = np.array([1000,2000]).astype(int)
-    moves = np.array([[[0,0],[0,1]],[[0,0],[1,0]]])
-    play_vect = np.ones(generation_size).astype(int)
+    moves = np.array([[[2,2],[1,2]],[[0,0],[1,0]]])
+    play_vect = np.zeros(generation_size).astype(int)
     caps = np.array([5,5])
 
     print('-' * 80)
