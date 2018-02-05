@@ -2,10 +2,10 @@ import numpy as np
 
 from gravity import gravity_gpu
 from neuralNetworkGPU import NeuralNetworkGPU
-
+from timeit import timeit
 
 class Generation:
-    def __init__(self, generation_size, row_nb, column_nb, cap):
+    def __init__(self, generation_size, row_nb, column_nb, cap, skeletons_gpu):
         self.generation_size = generation_size
         self.row_nb = row_nb
         self.column_nb = column_nb
@@ -13,8 +13,9 @@ class Generation:
         self.skeletons = np.zeros((self.generation_size, self.row_nb, self.column_nb)).astype(int)
         self.scores = np.zeros(self.generation_size)
         self.move_mapper = self.build_move_mapper()
-        self.intelligence = NeuralNetworkGPU(self.generation_size, self.row_nb, self.column_nb)
+        self.intelligence = NeuralNetworkGPU(self.generation_size, self.row_nb, self.column_nb, skeletons_gpu)
         self.moves = np.zeros((self.generation_size, 2, 2))
+        self.skeletons_gpu = skeletons_gpu
 
     @property
     def caps(self):
