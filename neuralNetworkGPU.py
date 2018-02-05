@@ -46,7 +46,7 @@ class NeuralNetworkGPU(object):
         return self.sigmoid(self.gpu_mult(l2, self.syn2))
 
     def mutate(self, index):
-        l = len(index[0])
+        l = len(index)
 
         self.syn0[:l] = self.syn0[index]
         self.syn0[l:] = self.syn0[index]
@@ -59,7 +59,6 @@ class NeuralNetworkGPU(object):
         self.syn2[:l] = self.syn2[index]
         self.syn2[l:] = self.syn2[index]
         self.syn2[l:] += np.array([(2 * np.random.random((self.output_nb, self.output_nb)) - 1) / 5 for i in range(l)]).astype(np.float32)
-
 
     def export(self):
         return {

@@ -29,23 +29,25 @@ class Evolution:
         scores = np.zeros(self.generation_size)
         if self.use_gpu:
             for i in range(self.game_per_generation):
-                scores += np.array(list(self.generation.play()))
+                scores += self.generation.play()
         else:
             for i in range(self.game_per_generation):
                 scores += np.array(list(map(lambda ind: ind.play(), self.generation)))
         scores /= self.game_per_generation
-        self.score_mean.append(np.mean(scores))
-        self.score_max.append(np.max(scores))
-        self.score_min.append(np.min(scores))
-        median = np.median(scores)
+        self.save_scores(scores)
+        index = np.argsort(scores)[:self.generation_size//2].shape
         if self.use_gpu:
-            index = np.where(scores >= median)
             self.generation.intelligence.mutate(index)
         else:
-            newgen = [gen for score, gen in zip(scores, self.generation) if score >= median]
+            newgen = [gen for i, gen in zip(range(self.generation_size), self.generation) if i in index]
             for k in range(self.generation_size - len(newgen)):
                 newgen.append(newgen[k].mutate())
             self.generation = newgen
+
+    def save_scores(self, scores):
+        self.score_mean.append(np.mean(scores))
+        self.score_max.append(np.max(scores))
+        self.score_min.append(np.min(scores))
 
     def train(self):
         for i in range(self.generation_nb):
@@ -71,12 +73,12 @@ class Evolution:
 
 if __name__ == '__main__':
     evolution = Evolution(
-        generation_nb=10,
-        generation_size=10,
-        game_per_generation=10,
+        generation_nb=100,
+        generation_size=50,
+        game_per_generation=1,
         row_nb=6,
         column_nb=3,
         cap=7,
-        use_gpu=True
+        use_gpu=False
     )
     evolution.train()
