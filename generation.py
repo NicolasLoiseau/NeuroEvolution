@@ -34,13 +34,8 @@ class Generation:
         return self.skeletons.sum(axis=2)[:, 0] != 0
 
     def remodeling(self, play_range):
-        for i in play_range:
-            if self.skeletons[i][self.end_pt(i)] != self.skeletons[i][self.start_pt(i)]:
-                self.scores[i] += (self.skeletons[i][self.start_pt(i)] + self.skeletons[i][self.end_pt(i)])
-                self.skeletons[i][self.end_pt(i)] += self.skeletons[i][self.start_pt(i)]
-            else:
-                self.scores[i] += (2 * self.skeletons[i][self.start_pt(i)])
-            self.skeletons[i][self.start_pt(i)] = 0
+        self.skeletons, caps, self.scores = remodeling_gpu(self.skeletons, self.moves, self.scores, self.caps, play_range, cap0=self.cap0)
+
 
     def refill(self, not_equal, play_range):
         for i in play_range:
@@ -134,9 +129,9 @@ class Generation:
     def end_pt(self, i):
         return self.moves[i, 1, 0], self.moves[i, 1, 1]
 
-
 if __name__ == '__main__':
     gen = Generation(1, 6, 3, 7)
     gen.fill()
     # gravity_gpu(gen.skeletons)
     gen.play()
+    print('ok')
